@@ -3,6 +3,7 @@ using ApiPeliculas.Models.Dtos;
 using ApiPeliculas.Repository.IRepository;
 using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -53,6 +54,44 @@ namespace ApiPeliculas.Controllers
 
             var PeliculaDto = _mapper.Map<PeliculaDto>(itemPelicula);
             return Ok(PeliculaDto);
+        }
+
+        [HttpGet("GetPeliculasEnCategoria/{categoriaId:int}")]
+        public IActionResult GetPeliculasEnCategoria(int categoriaId)
+        {
+            var listaPelicula = _peliculaRepository.GetPeliculasEnCategoria(categoriaId);
+            if (listaPelicula == null)
+            {
+                return NotFound();
+            }
+
+            var itemPelicula = new List<PeliculaDto>();
+            foreach (var item in listaPelicula)
+            {
+                itemPelicula.Add(_mapper.Map<PeliculaDto>(item));
+            }
+            return Ok(itemPelicula);
+        }
+
+
+        [HttpGet("Buscar")]
+        public IActionResult Buscar(string nombrePelicula)
+        {
+            try
+            {
+                var resultado = _peliculaRepository.BuscarPelicula(nombrePelicula);
+                if ( resultado.Any() )
+                {
+                    return Ok(resultado);
+                }
+
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error recuperando datos de la aplicación.");
+            }
         }
 
         [HttpPost]
@@ -130,7 +169,6 @@ namespace ApiPeliculas.Controllers
                 ModelState.AddModelError("", $"Algo salio mal eliminando el registro {Pelicula.Descripcion}");
                 return StatusCode(500, ModelState);
             }
-
             return NoContent();
         }
     }
