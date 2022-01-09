@@ -10,7 +10,6 @@ namespace ApiPeliculas.Models.Dtos
         [Required(ErrorMessage ="El nombre es obligatorio")]
         public string Nombre { get; set; }
 
-        [Required(ErrorMessage = "La imagen es obligatorio")]
         public string RutaImagen { get; set; }
 
         public IFormFile Foto { get; set; }
