@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace ApiPeliculas.Repository
 {
-    public class CategoriaRepositorio : ICategoriaRepository
+    public class CategoriaRepository : ICategoriaRepository
     {
         private readonly ApplicationDbContext _bd;
-        public CategoriaRepositorio(ApplicationDbContext bd)
+        public CategoriaRepository(ApplicationDbContext bd)
         {
             _bd = bd;
         }
