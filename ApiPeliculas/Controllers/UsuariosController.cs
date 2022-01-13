@@ -3,10 +3,12 @@ using ApiPeliculas.Models.Dtos;
 using ApiPeliculas.Repository.IRepository;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Security.Claims;
+using System.Text;
 
 namespace ApiPeliculas.Controllers
 {
@@ -16,10 +18,12 @@ namespace ApiPeliculas.Controllers
     {
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IMapper _mapper;
-        public UsuariosController(IUsuarioRepository usuarioRepository, IMapper mapper)
+        private readonly IConfiguration _config;
+        public UsuariosController(IUsuarioRepository usuarioRepository, IMapper mapper, IConfiguration config)
         {
             _usuarioRepository = usuarioRepository;
             _mapper = mapper;
+            _config = config;
         }
 
         [HttpGet]
@@ -70,6 +74,35 @@ namespace ApiPeliculas.Controllers
             return Ok(usuarioCreado);
 
         }
+        [HttpPost("Login")]
+        public IActionResult Login([FromBody] UsuarioAuthLoginDto usuarioAuthLoginDto)
+        {
+            var usuarioDesdeRepo = _usuarioRepository.Login(usuarioAuthLoginDto.Usuario, usuarioAuthLoginDto.Password);
+            if (usuarioDesdeRepo == null)
+            {
+                return Unauthorized();
+            }
 
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, usuarioDesdeRepo.Id.ToString()),
+                new Claim(ClaimTypes.Name, usuarioDesdeRepo.UsuarioA.ToString())
+            };
+
+            // Generación de token
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetSection("AppSettings:Token").Value));
+            var credenciales = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            var tokenDescriptor = new SecurityTokenDescriptor 
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.AddDays(1),
+                SigningCredentials = credenciales
+            };
+            var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return Ok( new { token = tokenHandler.WriteToken(token) } );
+        }
     }
 }
