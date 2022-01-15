@@ -2,6 +2,7 @@
 using ApiPeliculas.Models.Dtos;
 using ApiPeliculas.Repository.IRepository;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace ApiPeliculas.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     [ApiExplorerSettings(GroupName = "ApiPeliculas")]
@@ -27,7 +29,7 @@ namespace ApiPeliculas.Controllers
             _mapper = mapper;
             _hostingEnvironment = hostingEnvironment;
         }
-
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult GetPeliculas()
         {
@@ -42,7 +44,7 @@ namespace ApiPeliculas.Controllers
             return Ok(listaPeliculasDto);
 
         }
-
+        [AllowAnonymous]
         [HttpGet("{PeliculaId:int}", Name ="GetPelicula")]
         public IActionResult GetPelicula(int PeliculaId)
         {
