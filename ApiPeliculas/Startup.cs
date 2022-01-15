@@ -15,7 +15,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -51,6 +53,65 @@ namespace ApiPeliculas
                 });
 
             services.AddAutoMapper(typeof(PeliculasMappers));
+
+            // De aqui en adelante configuracion de documentacion de nuestra API
+            services.AddSwaggerGen( options => {
+                options.SwaggerDoc("ApiPeliculasCategorias", new Microsoft.OpenApi.Models.OpenApiInfo()
+                {
+                    Title = "API Categorias Peliculas",
+                    Version = "1",
+                    Description = "Backend peliculas",
+                    Contact = new Microsoft.OpenApi.Models.OpenApiContact()
+                    {
+                        Email = "admin@gmail.com",
+                        Name = "AdminAdmin",
+                        Url = new Uri("https://youtube.com")
+                    },
+                    License = new Microsoft.OpenApi.Models.OpenApiLicense()
+                    {
+                        Name = "MIT License",
+                        Url = new Uri("https://en.wikipedia.org/wiki/MIT_license")
+                    }
+                });
+                options.SwaggerDoc("ApiPeliculas", new Microsoft.OpenApi.Models.OpenApiInfo()
+                {
+                    Title = "API Peliculas",
+                    Version = "1",
+                    Description = "Backend peliculas",
+                    Contact = new Microsoft.OpenApi.Models.OpenApiContact()
+                    {
+                        Email = "admin@gmail.com",
+                        Name = "AdminAdmin",
+                        Url = new Uri("https://youtube.com")
+                    },
+                    License = new Microsoft.OpenApi.Models.OpenApiLicense()
+                    {
+                        Name = "MIT License",
+                        Url = new Uri("https://en.wikipedia.org/wiki/MIT_license")
+                    }
+                });
+                options.SwaggerDoc("ApiPeliculasUsuarios", new Microsoft.OpenApi.Models.OpenApiInfo()
+                {
+                    Title = "API Usuarios Peliculas",
+                    Version = "1",
+                    Description = "Backend peliculas",
+                    Contact = new Microsoft.OpenApi.Models.OpenApiContact()
+                    {
+                        Email = "admin@gmail.com",
+                        Name = "AdminAdmin",
+                        Url = new Uri("https://youtube.com")
+                    },
+                    License = new Microsoft.OpenApi.Models.OpenApiLicense()
+                    {
+                        Name = "MIT License",
+                        Url = new Uri("https://en.wikipedia.org/wiki/MIT_license")
+                    }
+                });
+                var archivoXmlComentarios = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var rutaApiComentarios = Path.Combine(AppContext.BaseDirectory, archivoXmlComentarios);
+                options.IncludeXmlComments(rutaApiComentarios);
+            });
+
             services.AddControllers();
         }
 
@@ -61,6 +122,14 @@ namespace ApiPeliculas
             {
                 app.UseDeveloperExceptionPage();
             }
+            // Linea para documentacion api
+            app.UseSwagger();
+            app.UseSwaggerUI( options => {
+                options.SwaggerEndpoint("/swagger/ApiPeliculasCategorias/swagger.json","API Categorias Peliculas");
+                options.SwaggerEndpoint("/swagger/ApiPeliculas/swagger.json", "API Peliculas");
+                options.SwaggerEndpoint("/swagger/ApiPeliculasUsuarios/swagger.json", "API Usuarios Peliculas");
+                options.RoutePrefix = "";
+            });
 
             app.UseRouting();
 
